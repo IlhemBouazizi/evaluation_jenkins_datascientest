@@ -15,6 +15,8 @@ pipeline
                 script {
                 sh '''
                 echo "Pulling $BRANCH_NAME branch"
+
+                git branch
                 
                 docker login -u $DOCKER_ID -p $DOCKER_PASS
                 '''
