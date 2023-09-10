@@ -44,6 +44,14 @@ pipeline
         }
         stage('Deploiement en dev')
         {
+            when 
+            {
+                branch 'master'
+            }
+            input
+            {
+                message "Confirmer le deployment en prod"
+            }
             environment
             {
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
@@ -61,6 +69,14 @@ pipeline
                 '''
                 }
             }
+            post 
+            {
+                success 
+                {
+                    sleep 90
+                    curl "http://localhost:$NODEPORT_NGINX"
+                }
+            }            
         }
     }
 }
