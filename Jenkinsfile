@@ -9,11 +9,12 @@ pipeline
             {
                 DOCKER_PASS = credentials("DOCKER_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
                 DOCKER_ID = 'ilhemb'
+                BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
             }
             steps {
                 script {
                 sh '''
-                echo 'Pulling...' + env.BRANCH_NAME
+                echo 'Pulling $BRANCH_NAME branch'
                 
                 docker login -u $DOCKER_ID -p $DOCKER_PASS
                 '''
