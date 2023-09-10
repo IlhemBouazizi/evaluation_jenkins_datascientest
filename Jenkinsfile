@@ -1,12 +1,12 @@
 pipeline {
 agent any // Jenkins will be able to select all available agents
-environment
-{
-    DOCKER_PASS = credentials("DOCKER_HUB_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
-    DOCKER_ID = 'ilhemb'
-}
 stages {
         stage('Docker Login'){ //we pass the built image to our docker hub account
+            environment
+            {
+                DOCKER_PASS = credentials("DOCKER_PASS") // we retrieve  docker password from secret text called docker_hub_pass saved on jenkins
+                DOCKER_ID = 'ilhemb'
+            }
             steps {
                 script {
                 sh '''
