@@ -14,7 +14,7 @@ pipeline
             steps {
                 script {
                 sh '''
-                echo 'Pulling $BRANCH_NAME branch'
+                echo "Pulling $BRANCH_NAME branch"
                 
                 docker login -u $DOCKER_ID -p $DOCKER_PASS
                 '''
