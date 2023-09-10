@@ -169,6 +169,10 @@ pipeline
         }
         stage('Deploiement en prod')
         {
+            when 
+            {
+                branch 'master'
+            }            
             input
             {
                 message "Confirmer le deployment en prod"
