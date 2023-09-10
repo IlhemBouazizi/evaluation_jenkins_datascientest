@@ -49,9 +49,9 @@ pipeline
                 KUBECONFIG = credentials("config") // we retrieve  kubeconfig from secret file called config saved on jenkins
                 NAMESPACE = dev
                 CHARTNAME = microservice-fastapi-dev                
-                NODEPORT_NGINX = 3000
-                CLUSTERIP_MOVIE = 10.43.50.0
-                CLUSTERIP_CAST = 10.43.50.1
+                NODEPORT_NGINX = '3000'
+                CLUSTERIP_MOVIE = '10.43.50.0'
+                CLUSTERIP_CAST = '10.43.50.1'
             }
             steps {
                 script {
