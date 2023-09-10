@@ -13,6 +13,8 @@ pipeline
             steps {
                 script {
                 sh '''
+                echo 'Pulling...' + env.BRANCH_NAME
+                
                 docker login -u $DOCKER_ID -p $DOCKER_PASS
                 '''
                 }
