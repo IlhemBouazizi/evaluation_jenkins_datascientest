@@ -3,7 +3,7 @@ pipeline
     agent any // Jenkins will be able to select all available agents
     stages 
     {
-        stage('Docker Login')
+        stage('Pre-Build')
         { //we pass the built image to our docker hub account
             environment
             {
@@ -15,6 +15,10 @@ pipeline
                 script {
                 sh '''
                 echo "Pulling $BRANCH_NAME branch"
+
+                git branch
+
+                git switch master
 
                 git branch
                 
