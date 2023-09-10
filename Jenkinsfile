@@ -24,6 +24,16 @@ stages {
                 docker image build webapp/nginx-service/ -t nginx-service:latest
                 docker tag nginx-service ilhemb/nginx-service:latest
                 docker image push ilhemb/nginx-service:latest
+
+                echo "-----  Build movie service"
+                docker image build webapp/movie-service/ -t movie-service:latest
+                docker tag movie-service ilhemb/movie-service:latest
+                docker image push ilhemb/movie-service:latest
+
+                echo "-----  Build cast service"
+                docker image build webapp/cast-service/ -t cast-service:latest
+                docker tag cast-service ilhemb/cast-service:latest
+                docker image push ilhemb/cast-service:latest                                
                 '''
                 }
             }
