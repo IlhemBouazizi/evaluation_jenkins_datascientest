@@ -11,19 +11,17 @@ pipeline
                 DOCKER_ID = 'ilhemb'
                 BRANCH_NAME = "${GIT_BRANCH.split("/")[1]}"
             }
-            steps {
-                script {
-                sh '''
-                echo "Pulling $BRANCH_NAME branch"
+            steps 
+            {
+                script 
+                {
+                    sh '''
+                    echo "Pulling $BRANCH_NAME branch"
 
-                git branch
-
-                git switch master
-
-                git branch
-                
-                docker login -u $DOCKER_ID -p $DOCKER_PASS
-                '''
+                    git branch
+                    
+                    docker login -u $DOCKER_ID -p $DOCKER_PASS
+                    '''
                 }
             }
         }
@@ -53,10 +51,6 @@ pipeline
         }
         stage('Deploiement en dev')
         {
-            when 
-            {
-                branch 'master'
-            }
             input
             {
                 message "Confirmer le deployment en prod"
