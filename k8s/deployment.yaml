@@ -1,0 +1,252 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: ilhemb/nginx-service:latest
+          ports:
+            - containerPort: 8080
+      initContainers:
+        - name: init-nginx
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 60']              
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  namespace: jenkins
+spec:
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30005
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: movie
+  template:
+    metadata:
+      labels:
+        app: movie
+    spec:
+      containers:
+        - name: movie
+          image: ilhemb/movie-service:latest
+          command: ['sh', '-c', 'uvicorn app.main:app --reload --host 0.0.0.0 --port 8000']
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URI
+              value: postgresql://movie_db_username:movie_db_password@movie_db/movie_db_dev
+            - name: CAST_SERVICE_HOST_URL
+              value: http://cast_service:8000/api/v1/casts/ 
+          volumeMounts:
+            - name: movie-volume
+              mountPath: ./movie-service/
+      volumes:
+        - name: movie-volume
+          hostPath:
+            path: /app
+      initContainers:
+        - name: init-movie
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 30']                                      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-service
+  namespace: jenkins
+spec:
+  type: ClusterIP
+  selector:
+    app: movie
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8000  
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: cast
+  template:
+    metadata:
+      labels:
+        app: cast
+    spec:
+      containers:
+        - name: cast
+          image: ilhemb/cast-service:latest
+          command: ['sh', '-c', 'uvicorn app.main:app --reload --host 0.0.0.0 --port 8000']
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URI
+              value: postgresql://cast_db_username:cast_db_password@cast_db/cast_db_dev
+          volumeMounts:
+            - name: cast-volume
+              mountPath: ./cast-service/
+      volumes:
+        - name: cast-volume
+          hostPath:
+            path: /app              
+      initContainers:
+        - name: init-cast
+          image: busybox:1.28
+          command: ['sh', '-c', 'echo The gateway is running! && sleep 30']                                      
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cast-service
+  namespace: jenkins
+spec:
+  type: ClusterIP
+  selector:
+    app: cast
+  ports:
+    - protocol: TCP
+      port: 8002
+      targetPort: 8000  
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-db
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: movie-db
+  template:
+    metadata:
+      labels:
+        app: movie-db
+    spec:
+      containers:
+        - name: movie-db
+          image: postgres:12.1-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: movie-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: movie-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: movie_db_dev
+          volumeMounts:
+            - name: movie-volume
+              mountPath: postgres_data_movie
+      volumes:
+        - name: movie-volume
+          hostPath:
+            path: /var/lib/postgresql/data/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: movie-service
+  namespace: jenkins
+spec:
+  type: ClusterIP
+  selector:
+    app: movie-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432  
+---    
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-db
+  namespace: jenkins
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: cast-db
+  template:
+    metadata:
+      labels:
+        app: cast-db
+    spec:
+      containers:
+        - name: cast-db
+          image: postgres:12.1-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cast-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cast-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: cast_db_dev
+          volumeMounts:
+            - name: cast-volume
+              mountPath: postgres_data_cast
+      volumes:
+        - name: cast-volume
+          hostPath:
+            path: /var/lib/postgresql/data/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cast-service
+  namespace: jenkins
+spec:
+  type: ClusterIP
+  selector:
+    app: cast-db
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432  
+
